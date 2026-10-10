@@ -41,8 +41,8 @@ const ICONS = {
   menu: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="18" x2="20" y2="18"/></svg>`,
 };
 
-// ─── PRODUCT DATA ────────────────────────────────────
-const PRODUCTS = [
+// ─── PRODUCT DATA & STORAGE ──────────────────────────
+const DEFAULT_PRODUCTS = [
   {
     id: 1,
     name: "Indomie Goreng Original",
@@ -356,6 +356,33 @@ const PRODUCTS = [
     ]
   }
 ];
+
+function getStoredProducts() {
+  const stored = localStorage.getItem("kel2store_products");
+  if (!stored) {
+    localStorage.setItem("kel2store_products", JSON.stringify(DEFAULT_PRODUCTS));
+    return DEFAULT_PRODUCTS;
+  }
+  try {
+    const parsed = JSON.parse(stored);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed;
+    }
+    localStorage.setItem("kel2store_products", JSON.stringify(DEFAULT_PRODUCTS));
+    return DEFAULT_PRODUCTS;
+  } catch (e) {
+    return DEFAULT_PRODUCTS;
+  }
+}
+
+let PRODUCTS = getStoredProducts();
+
+function refreshProductsFromStorage() {
+  PRODUCTS = getStoredProducts();
+  renderProducts(getFilteredProducts());
+  renderTopSellers();
+  renderCartDrawer();
+}
 
 const CATEGORIES = [
   { name: "Makanan", icon: "utensils" },
@@ -1060,20 +1087,161 @@ function closeCart() {
   document.body.style.overflow = "";
 }
 
-function checkoutWhatsApp() {
-  if (cart.length === 0) return;
+// ─── CHECKOUT MODAL & ORDERS ──────────────────────────
 
-  let message = "Halo Kel2Store! Saya ingin memesan:\n\n";
-  cart.forEach(item => {
+function openCheckoutModal() {
+  if (cart.length === 0) {
+    showToast("Keranjang belanja Anda masih kosong");
+    return;
+  }
+
+  // Close cart drawer
+  closeCart();
+
+  renderCheckoutSummary();
+
+  const overlay = document.getElementById("checkout-modal-overlay");
+  const modal = document.getElementById("checkout-modal");
+  if (overlay && modal) {
+    overlay.classList.add("open");
+    modal.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+}
+
+function closeCheckoutModal() {
+  const overlay = document.getElementById("checkout-modal-overlay");
+  const modal = document.getElementById("checkout-modal");
+  if (overlay && modal) {
+    overlay.classList.remove("open");
+    modal.classList.remove("open");
+    document.body.style.overflow = "";
+  }
+}
+
+function renderCheckoutSummary() {
+  const itemsContainer = document.getElementById("checkout-items-list");
+  const subtotalEl = document.getElementById("checkout-subtotal");
+  const grandTotalEl = document.getElementById("checkout-grand-total");
+
+  if (!itemsContainer) return;
+
+  const total = getCartTotal();
+
+  itemsContainer.innerHTML = cart.map(item => {
     const product = PRODUCTS.find(p => p.id === item.id);
-    if (product) {
-      message += `• ${product.name} x${item.qty} = ${formatPrice(product.price * item.qty)}\n`;
-    }
-  });
-  message += `\n*Total: ${formatPrice(getCartTotal())}*\n\nTerima kasih!`;
+    if (!product) return "";
+    return `
+      <div class="checkout-item-row">
+        <img src="${product.image}" alt="${product.name}" class="checkout-item-thumb" onerror="imgFallback(this)">
+        <div class="checkout-item-info">
+          <div class="checkout-item-name">${product.name}</div>
+          <div class="checkout-item-meta">${item.qty} × ${formatPrice(product.price)}</div>
+        </div>
+        <div class="checkout-item-price">${formatPrice(product.price * item.qty)}</div>
+      </div>
+    `;
+  }).join("");
 
-  const encoded = encodeURIComponent(message);
-  window.open(`https://wa.me/6285135437356?text=${encoded}`, "_blank");
+  if (subtotalEl) subtotalEl.textContent = formatPrice(total);
+  if (grandTotalEl) grandTotalEl.textContent = formatPrice(total);
+}
+
+function handleCheckoutSubmit(e) {
+  e.preventDefault();
+
+  if (cart.length === 0) {
+    showToast("Keranjang Anda kosong");
+    return;
+  }
+
+  const nameInput = document.getElementById("cust-name");
+  const phoneInput = document.getElementById("cust-phone");
+  const addressInput = document.getElementById("cust-address");
+  const notesInput = document.getElementById("cust-notes");
+
+  const orderId = `ORD-${Date.now().toString().slice(-6)}`;
+  const orderTotal = getCartTotal();
+
+  const orderItems = cart.map(item => {
+    const product = PRODUCTS.find(p => p.id === item.id);
+    return {
+      id: item.id,
+      name: product ? product.name : "Produk",
+      price: product ? product.price : 0,
+      qty: item.qty,
+      image: product ? product.image : "",
+      category: product ? product.category : ""
+    };
+  });
+
+  const newOrder = {
+    id: orderId,
+    customer: {
+      name: nameInput ? nameInput.value.trim() : "",
+      phone: phoneInput ? phoneInput.value.trim() : "",
+      address: addressInput ? addressInput.value.trim() : "",
+      notes: notesInput ? notesInput.value.trim() : ""
+    },
+    items: orderItems,
+    total: orderTotal,
+    itemCount: cart.reduce((sum, item) => sum + item.qty, 0),
+    status: "Pending",
+    date: new Date().toLocaleString("id-ID", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    }),
+    createdAt: new Date().toISOString()
+  };
+
+  // Save to localStorage
+  const existingOrders = JSON.parse(localStorage.getItem("kel2store_orders") || "[]");
+  existingOrders.unshift(newOrder);
+  localStorage.setItem("kel2store_orders", JSON.stringify(existingOrders));
+
+  // Clear cart
+  cart = [];
+  saveCart();
+  renderCartDrawer();
+
+  // Reset checkout form
+  const checkoutForm = document.getElementById("checkout-form");
+  if (checkoutForm) checkoutForm.reset();
+
+  // Close checkout modal
+  closeCheckoutModal();
+
+  // Open success modal
+  openOrderSuccessModal(newOrder);
+}
+
+function openOrderSuccessModal(order) {
+  const overlay = document.getElementById("order-success-overlay");
+  const modal = document.getElementById("order-success-modal");
+  const orderIdEl = document.getElementById("success-order-id");
+  const orderTotalEl = document.getElementById("success-order-total");
+
+  if (orderIdEl) orderIdEl.textContent = order.id;
+  if (orderTotalEl) orderTotalEl.textContent = formatPrice(order.total);
+
+  if (overlay && modal) {
+    overlay.classList.add("open");
+    modal.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+}
+
+function closeOrderSuccessModal() {
+  const overlay = document.getElementById("order-success-overlay");
+  const modal = document.getElementById("order-success-modal");
+  if (overlay && modal) {
+    overlay.classList.remove("open");
+    modal.classList.remove("open");
+    document.body.style.overflow = "";
+  }
 }
 
 // ─── SEARCH ──────────────────────────────────────────
@@ -1108,6 +1276,9 @@ function toggleMobileMenu() {
 // ─── INITIALIZATION ──────────────────────────────────
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Synchronize stored products
+  PRODUCTS = getStoredProducts();
+
   // Render dynamic content
   renderCategories();
   renderProducts(PRODUCTS);
@@ -1117,46 +1288,78 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Desktop search input
   const searchInput = document.getElementById("search-input");
-  searchInput.addEventListener("input", (e) => handleSearch(e.target.value));
+  if (searchInput) {
+    searchInput.addEventListener("input", (e) => handleSearch(e.target.value));
+  }
 
   // Mobile search input
   const mobileSearchInput = document.getElementById("mobile-search-input");
-  mobileSearchInput.addEventListener("input", (e) => {
-    handleSearch(e.target.value);
-    searchInput.value = e.target.value;
-  });
+  if (mobileSearchInput) {
+    mobileSearchInput.addEventListener("input", (e) => {
+      handleSearch(e.target.value);
+      if (searchInput) searchInput.value = e.target.value;
+    });
 
-  // Sync desktop → mobile
-  searchInput.addEventListener("input", () => {
-    mobileSearchInput.value = searchInput.value;
-  });
+    // Sync desktop → mobile
+    if (searchInput) {
+      searchInput.addEventListener("input", () => {
+        mobileSearchInput.value = searchInput.value;
+      });
+    }
+  }
 
-  // Modal close events
+  // Modal close events (Product detail modal)
   const modalOverlay = document.getElementById("product-modal-overlay");
   const modalCloseBtn = document.getElementById("modal-close-btn");
   if (modalOverlay) modalOverlay.addEventListener("click", closeProductModal);
   if (modalCloseBtn) modalCloseBtn.addEventListener("click", closeProductModal);
 
-  // Cart overlay click
-  document.getElementById("cart-overlay").addEventListener("click", closeCart);
+  // Cart overlay click & drawer buttons
+  const cartOverlay = document.getElementById("cart-overlay");
+  if (cartOverlay) cartOverlay.addEventListener("click", closeCart);
 
-  // Cart buttons
   document.querySelectorAll("[data-open-cart]").forEach(btn => {
     btn.addEventListener("click", openCart);
   });
 
-  document.getElementById("cart-close").addEventListener("click", closeCart);
+  const cartCloseBtn = document.getElementById("cart-close");
+  if (cartCloseBtn) cartCloseBtn.addEventListener("click", closeCart);
 
-  // WhatsApp checkout
-  document.getElementById("checkout-wa").addEventListener("click", checkoutWhatsApp);
+  // Checkout modal trigger from Cart Drawer
+  const cartCheckoutBtn = document.getElementById("cart-checkout-btn");
+  if (cartCheckoutBtn) {
+    cartCheckoutBtn.addEventListener("click", openCheckoutModal);
+  }
 
-  // Keyboard: Escape closes modal & cart drawer
+  // Checkout modal close & cancel
+  const checkoutOverlay = document.getElementById("checkout-modal-overlay");
+  const checkoutCloseBtn = document.getElementById("checkout-close-btn");
+  const checkoutCancelBtn = document.getElementById("checkout-cancel-btn");
+  if (checkoutOverlay) checkoutOverlay.addEventListener("click", closeCheckoutModal);
+  if (checkoutCloseBtn) checkoutCloseBtn.addEventListener("click", closeCheckoutModal);
+  if (checkoutCancelBtn) checkoutCancelBtn.addEventListener("click", closeCheckoutModal);
+
+  // Checkout form submission
+  const checkoutForm = document.getElementById("checkout-form");
+  if (checkoutForm) {
+    checkoutForm.addEventListener("submit", handleCheckoutSubmit);
+  }
+
+  // Success modal buttons
+  const successOverlay = document.getElementById("order-success-overlay");
+  const successCloseBtn = document.getElementById("btn-success-close");
+  if (successOverlay) successOverlay.addEventListener("click", closeOrderSuccessModal);
+  if (successCloseBtn) successCloseBtn.addEventListener("click", closeOrderSuccessModal);
+
+  // Keyboard: Escape closes modals & cart drawer
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       closeProductModal();
       closeCart();
+      closeCheckoutModal();
+      closeOrderSuccessModal();
       const mobileNav = document.getElementById("mobile-nav");
-      if (mobileNav.classList.contains("open")) {
+      if (mobileNav && mobileNav.classList.contains("open")) {
         toggleMobileMenu();
       }
     }
@@ -1167,9 +1370,9 @@ document.addEventListener("DOMContentLoaded", () => {
     link.addEventListener("click", () => {
       const menu = document.getElementById("mobile-nav");
       const hamburger = document.getElementById("hamburger");
-      if (menu.classList.contains("open")) {
+      if (menu && menu.classList.contains("open")) {
         menu.classList.remove("open");
-        hamburger.classList.remove("active");
+        if (hamburger) hamburger.classList.remove("active");
       }
     });
   });
@@ -1177,8 +1380,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // Smooth scroll for anchor links
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener("click", (e) => {
+      const href = anchor.getAttribute("href");
+      if (href === "#") return;
       e.preventDefault();
-      const target = document.querySelector(anchor.getAttribute("href"));
+      const target = document.querySelector(href);
       if (target) {
         target.scrollIntoView({ behavior: "smooth" });
       }
@@ -1186,32 +1391,46 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // CTA buttons
-  document.getElementById("cta-belanja").addEventListener("click", () => {
-    document.getElementById("produk").scrollIntoView({ behavior: "smooth" });
-  });
-  document.getElementById("cta-lihat").addEventListener("click", () => {
-    document.getElementById("produk").scrollIntoView({ behavior: "smooth" });
-  });
-  document.getElementById("cta-promo").addEventListener("click", () => {
-    activeCategory = null;
-    document.querySelectorAll(".category-card").forEach(c => c.classList.remove("active"));
-    const promoCards = document.querySelectorAll('[data-category="Promo"]');
-    promoCards.forEach(c => c.classList.add("active"));
-    renderProducts(PRODUCTS.filter(p => p.badge === "promo"));
-    document.getElementById("produk").scrollIntoView({ behavior: "smooth" });
-  });
+  const ctaBelanja = document.getElementById("cta-belanja");
+  if (ctaBelanja) {
+    ctaBelanja.addEventListener("click", () => {
+      document.getElementById("produk")?.scrollIntoView({ behavior: "smooth" });
+    });
+  }
+
+  const ctaLihat = document.getElementById("cta-lihat");
+  if (ctaLihat) {
+    ctaLihat.addEventListener("click", () => {
+      document.getElementById("produk")?.scrollIntoView({ behavior: "smooth" });
+    });
+  }
+
+  const ctaPromo = document.getElementById("cta-promo");
+  if (ctaPromo) {
+    ctaPromo.addEventListener("click", () => {
+      activeCategory = null;
+      document.querySelectorAll(".category-card").forEach(c => c.classList.remove("active"));
+      const promoCards = document.querySelectorAll('[data-category="Promo"]');
+      promoCards.forEach(c => c.classList.add("active"));
+      renderProducts(PRODUCTS.filter(p => p.badge === "promo"));
+      document.getElementById("produk")?.scrollIntoView({ behavior: "smooth" });
+    });
+  }
 
   // "Lihat Semua" link
-  document.getElementById("view-all-products").addEventListener("click", (e) => {
-    e.preventDefault();
-    activeCategory = null;
-    searchQuery = "";
-    searchInput.value = "";
-    mobileSearchInput.value = "";
-    document.querySelectorAll(".category-card").forEach(c => c.classList.remove("active"));
-    renderProducts(PRODUCTS);
-    document.getElementById("produk").scrollIntoView({ behavior: "smooth" });
-  });
+  const viewAllBtn = document.getElementById("view-all-products");
+  if (viewAllBtn) {
+    viewAllBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      activeCategory = null;
+      searchQuery = "";
+      if (searchInput) searchInput.value = "";
+      if (mobileSearchInput) mobileSearchInput.value = "";
+      document.querySelectorAll(".category-card").forEach(c => c.classList.remove("active"));
+      renderProducts(PRODUCTS);
+      document.getElementById("produk")?.scrollIntoView({ behavior: "smooth" });
+    });
+  }
 
   // Active nav link on scroll
   const sections = document.querySelectorAll("section[id]");
@@ -1226,12 +1445,32 @@ document.addEventListener("DOMContentLoaded", () => {
       if (entry.isIntersecting) {
         const id = entry.target.id;
         navLinks.forEach(link => {
-          link.classList.toggle("active", link.getAttribute("href") === `#${id}`);
+          if (link.getAttribute("href") === `#${id}`) {
+            link.classList.add("active");
+          } else if (link.getAttribute("href")?.startsWith("#")) {
+            link.classList.remove("active");
+          }
         });
       }
     });
   }, observerOptions);
 
   sections.forEach(section => observer.observe(section));
+
+  // Sync across tabs/windows (e.g., when products are updated in admin.html)
+  window.addEventListener("storage", (e) => {
+    if (e.key === "kel2store_products") {
+      refreshProductsFromStorage();
+    } else if (e.key === "kel2store_cart") {
+      cart = JSON.parse(localStorage.getItem("kel2store_cart") || "[]");
+      updateCartCount();
+      renderCartDrawer();
+    }
+  });
+
+  // Also refresh when tab gains focus
+  window.addEventListener("focus", () => {
+    refreshProductsFromStorage();
+  });
 });
 
