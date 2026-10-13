@@ -2938,5 +2938,13 @@ button {
   .success-modal-actions {
     grid-template-columns: 1fr;
   }
+.admin-link-subtle {
+  color: inherit;
+  opacity: 0.7;
+  text-decoration: underline;
+  transition: opacity 0.2s ease;
 }
-
+.admin-link-subtle:hover {
+  opacity: 1;
+  color: var(--clr-brand, #2F9E6B);
+}
