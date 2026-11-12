@@ -3,31 +3,46 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kel2Store Admin — Dashboard</title>
-  <meta name="description" content="Panel Admin Kel2Store untuk mengelola pesanan, produk, dan ringkasan penjualan toko.">
+  <title>Kel2Store Admin — Dashboard Pengelola Toko</title>
+  <meta name="description" content="Panel Admin Kel2Store untuk mengelola pesanan, produk, dan ringkasan penjualan toko secara simpel dan real-time.">
   <link rel="stylesheet" href="css/admin.css">
 </head>
 <body>
 
   <!-- ========== LOGIN MODAL ========== -->
   <div class="modal-overlay" id="login-overlay"></div>
-  <div class="login-modal" id="login-modal" role="dialog" aria-modal="true">
+  <div class="login-modal" id="login-modal" role="dialog" aria-modal="true" aria-labelledby="login-title">
     <div class="login-brand">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="32" height="32"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7"/></svg>
-      <h1>Kel2Store Admin</h1>
-      <p>Masuk untuk mengelola toko</p>
+      <div class="brand-icon-circle">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7"/></svg>
+      </div>
+      <h1 id="login-title">Kel2Store Admin</h1>
+      <p>Masuk untuk mengelola produk dan pesanan toko</p>
     </div>
+
     <form id="login-form">
       <div class="form-group">
-        <label for="login-email">Email</label>
-        <input type="email" id="login-email" placeholder="admin@kel2store.com" required>
+        <label for="login-email">Email Admin</label>
+        <input type="email" id="login-email" placeholder="admin@kel2store.com" value="admin@kel2store.com" required>
       </div>
       <div class="form-group">
-        <label for="login-password">Password</label>
-        <input type="password" id="login-password" placeholder="••••••••" required>
+        <label for="login-password">Kata Sandi</label>
+        <input type="password" id="login-password" placeholder="••••••••" value="admin123" required>
       </div>
       <div class="login-error" id="login-error"></div>
-      <button type="submit" class="btn btn-primary btn-full">Masuk</button>
+      <button type="submit" class="btn btn-primary btn-full">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        Masuk dengan Akun
+      </button>
+
+      <div class="login-divider">
+        <span>atau akses langsung</span>
+      </div>
+
+      <button type="button" class="btn btn-quick-demo btn-full" id="btn-quick-login">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Masuk Cepat (Mode Demo Admin)
+      </button>
     </form>
   </div>
 
@@ -38,29 +53,35 @@
     <header class="admin-topbar">
       <div class="topbar-left">
         <a href="admin.html" class="topbar-brand">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7"/></svg>
-          Kel2Store
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7"/></svg>
+          <span>Kel2Store</span>
+          <span class="badge-role">Admin</span>
         </a>
+        <div class="status-live-indicator" title="Sistem terhubung real-time">
+          <span class="pulse-dot"></span>
+          <span>Online</span>
+        </div>
       </div>
+
       <div class="topbar-right">
         <span class="topbar-date" id="current-date-text"></span>
-        <span class="topbar-user" id="admin-user-email"></span>
-        <a href="index.html" class="btn btn-ghost btn-sm">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          Toko
+        <a href="index.html" target="_blank" class="btn btn-outline btn-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          <span>Lihat Toko</span>
         </a>
-        <button class="btn btn-ghost btn-sm" id="btn-logout">
+        <span class="topbar-user" id="admin-user-email">admin@kel2store.com</span>
+        <button class="btn btn-ghost btn-sm" id="btn-logout" title="Keluar dari Panel Admin">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          Logout
+          <span>Keluar</span>
         </button>
       </div>
     </header>
 
-    <!-- Main Content — Single Page Layout -->
+    <!-- Main Content -->
     <main class="admin-main">
 
-      <!-- Stats Row -->
-      <div class="stats-row">
+      <!-- Stats Row (4 Simple KPIs) -->
+      <section class="stats-row" aria-label="Ringkasan Statistik Toko">
         <div class="stat-card">
           <div class="stat-icon omset-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
@@ -68,113 +89,258 @@
           <div class="stat-content">
             <span class="stat-label">Total Omset</span>
             <span class="stat-value" id="stat-omset">Rp 0</span>
+            <span class="stat-subtext">Dari pesanan berstatus selesai</span>
           </div>
         </div>
+
         <div class="stat-card">
           <div class="stat-icon pending-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           </div>
           <div class="stat-content">
-            <span class="stat-label">Pesanan Baru</span>
-            <span class="stat-value" id="stat-pending">0</span>
+            <span class="stat-label">Pesanan Baru (Pending)</span>
+            <span class="stat-value text-warning" id="stat-pending">0</span>
+            <span class="stat-subtext">Perlu segera diproses</span>
           </div>
         </div>
-      </div>
 
-      <!-- Orders Section -->
-      <div class="card">
-        <div class="card-header">
-          <h2>Daftar Pesanan</h2>
+        <div class="stat-card">
+          <div class="stat-icon success-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <div class="stat-content">
+            <span class="stat-label">Pesanan Selesai</span>
+            <span class="stat-value text-success" id="stat-completed">0</span>
+            <span class="stat-subtext">Transaksi sukses terkirim</span>
+          </div>
         </div>
-        <div class="table-wrap">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>Order ID</th>
-                <th>Pelanggan</th>
-                <th>Item</th>
-                <th>Total</th>
-                <th>Status</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody id="orders-tbody">
-              <!-- Rendered by JS -->
-            </tbody>
-          </table>
-        </div>
-      </div>
 
-      <!-- Products Section -->
-      <div class="card">
-        <div class="card-header">
-          <h2>Daftar Produk</h2>
-          <button class="btn btn-primary btn-sm" id="btn-add-product">
+        <div class="stat-card">
+          <div class="stat-icon product-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+          </div>
+          <div class="stat-content">
+            <span class="stat-label">Total Produk</span>
+            <span class="stat-value text-primary" id="stat-total-products">0</span>
+            <span class="stat-subtext">Item siap dijual di etalase</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quick Action Toolbar -->
+      <section class="quick-toolbar">
+        <div class="quick-toolbar-left">
+          <button class="btn btn-primary" id="btn-add-product">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-            Tambah Produk
+            Tambah Produk Baru
+          </button>
+          <button class="btn btn-secondary" id="btn-seed-all-products" title="Isi etalase dengan 12 produk pilihan siap jual">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            Muat 12 Produk Lengkap
           </button>
         </div>
-        <div id="products-list">
-          <!-- Rendered by JS -->
+        <div class="quick-toolbar-right">
+          <button class="btn btn-ghost btn-sm" id="btn-simulate-order" title="Buat contoh transaksi pesanan baru untuk demonstrasi">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            + Buat Contoh Pesanan
+          </button>
         </div>
+      </section>
+
+      <!-- Navigation Tabs -->
+      <div class="tab-nav">
+        <button class="tab-btn active" data-tab="tab-orders">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <span>Daftar Pesanan</span>
+          <span class="tab-badge" id="tab-orders-badge">0</span>
+        </button>
+        <button class="tab-btn" data-tab="tab-products">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+          <span>Katalog Produk</span>
+          <span class="tab-badge badge-neutral" id="tab-products-badge">0</span>
+        </button>
       </div>
+
+      <!-- TAB 1: ORDERS -->
+      <section class="tab-pane active" id="tab-orders">
+        <div class="card">
+          <div class="card-header flex-header">
+            <div>
+              <h2>Kelola Pesanan Masuk</h2>
+              <p class="card-subtitle">Pantau dan ubah status pesanan pelanggan toko secara langsung</p>
+            </div>
+            <!-- Search & Filters -->
+            <div class="table-controls">
+              <div class="search-box">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <input type="text" id="order-search" placeholder="Cari ID pesanan / pelanggan...">
+              </div>
+              <div class="filter-pills" id="order-status-filters">
+                <button class="pill-btn active" data-status="all">Semua</button>
+                <button class="pill-btn" data-status="Pending">Pending</button>
+                <button class="pill-btn" data-status="Selesai">Selesai</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>No. Order</th>
+                  <th>Pelanggan</th>
+                  <th>Item Belanja</th>
+                  <th>Total Bayar</th>
+                  <th>Status</th>
+                  <th style="text-align: right;">Aksi Cepat</th>
+                </tr>
+              </thead>
+              <tbody id="orders-tbody">
+                <!-- Rendered by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: PRODUCTS -->
+      <section class="tab-pane" id="tab-products">
+        <div class="card">
+          <div class="card-header flex-header">
+            <div>
+              <h2>Katalog Produk Toko</h2>
+              <p class="card-subtitle">Kelola nama, harga, kategori, stok barang, serta gambar produk</p>
+            </div>
+            <!-- Product Filter & Search -->
+            <div class="table-controls">
+              <div class="search-box">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <input type="text" id="product-search" placeholder="Cari nama produk...">
+              </div>
+              <select id="product-category-filter" class="select-filter">
+                <option value="all">Semua Kategori</option>
+                <option value="Makanan">Makanan</option>
+                <option value="Minuman">Minuman</option>
+                <option value="Snack">Snack</option>
+                <option value="Kebutuhan Harian">Kebutuhan Harian</option>
+                <option value="Lainnya">Lainnya</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="products-list-wrap">
+            <div id="products-list">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+        </div>
+      </section>
 
     </main>
   </div>
 
-  <!-- ========== PRODUCT FORM MODAL ========== -->
+  <!-- ========== PRODUCT FORM MODAL (ADD / EDIT) ========== -->
   <div class="modal-overlay" id="product-modal-overlay"></div>
-  <div class="form-modal" id="product-modal" role="dialog" aria-modal="true">
+  <div class="form-modal" id="product-modal" role="dialog" aria-modal="true" aria-labelledby="product-modal-title">
     <div class="form-modal-header">
-      <h2>Tambah Produk</h2>
-      <button class="btn-close" id="product-modal-close" aria-label="Tutup">
+      <h2 id="product-modal-title">Tambah Produk Baru</h2>
+      <button class="btn-close" id="product-modal-close" aria-label="Tutup form">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
       </button>
     </div>
+
     <form id="product-form">
+      <input type="hidden" id="prod-edit-id" value="">
+
       <div class="form-group">
-        <label for="prod-name">Nama Produk *</label>
-        <input type="text" id="prod-name" placeholder="Contoh: Kopi Susu Gula Aren" required>
+        <label for="prod-name">Nama Produk <span class="required">*</span></label>
+        <input type="text" id="prod-name" placeholder="Contoh: Kopi Susu Aren 250ml" required>
       </div>
+
       <div class="form-row">
         <div class="form-group">
-          <label for="prod-price">Harga (Rp) *</label>
+          <label for="prod-category">Kategori <span class="required">*</span></label>
+          <select id="prod-category" required>
+            <option value="Makanan">Makanan</option>
+            <option value="Minuman">Minuman</option>
+            <option value="Snack">Snack</option>
+            <option value="Kebutuhan Harian">Kebutuhan Harian</option>
+            <option value="Lainnya">Lainnya</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="prod-badge">Label Promosi (Opsional)</label>
+          <select id="prod-badge">
+            <option value="">Tidak ada label</option>
+            <option value="best-seller">Best Seller 🔥</option>
+            <option value="promo">Promo Diskon 🏷️</option>
+            <option value="new">Produk Baru ✨</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="prod-price">Harga Jual (Rp) <span class="required">*</span></label>
           <input type="number" id="prod-price" min="0" step="100" placeholder="15000" required>
         </div>
         <div class="form-group">
-          <label for="prod-stock">Stok *</label>
-          <input type="number" id="prod-stock" min="0" value="100" required>
+          <label for="prod-orig-price">Harga Asli/Coret (Rp)</label>
+          <input type="number" id="prod-orig-price" min="0" step="100" placeholder="18000 (opsional)">
         </div>
       </div>
-      <div class="form-group">
-        <label for="prod-category">Kategori *</label>
-        <select id="prod-category" required>
-          <option value="Makanan">Makanan</option>
-          <option value="Minuman">Minuman</option>
-          <option value="Snack">Snack</option>
-          <option value="Kebutuhan Harian">Kebutuhan Harian</option>
-          <option value="Lainnya">Lainnya</option>
-        </select>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="prod-stock">Stok Barang <span class="required">*</span></label>
+          <input type="number" id="prod-stock" min="0" value="100" required>
+        </div>
+        <div class="form-group">
+          <label for="prod-sold">Jumlah Terjual (Tampilan)</label>
+          <input type="text" id="prod-sold" placeholder="Contoh: 1,2rb atau 50" value="0">
+        </div>
       </div>
+
       <div class="form-group">
-        <label for="prod-image">URL Gambar *</label>
+        <label for="prod-image">URL Foto Produk <span class="required">*</span></label>
         <input type="url" id="prod-image" placeholder="https://images.unsplash.com/..." required>
+        
+        <!-- Preset quick image buttons -->
+        <div class="preset-links">
+          <span>Pilih contoh foto cepat:</span>
+          <div class="preset-buttons">
+            <button type="button" class="btn-preset" data-url="https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=600&h=600&fit=crop">🍜 Mie/Makanan</button>
+            <button type="button" class="btn-preset" data-url="https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=600&h=600&fit=crop">🧃 Teh/Minuman</button>
+            <button type="button" class="btn-preset" data-url="https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=600&h=600&fit=crop">☕ Kopi</button>
+            <button type="button" class="btn-preset" data-url="https://images.unsplash.com/photo-1621447504864-d8686e12698c?w=600&h=600&fit=crop">🥔 Snack/Keripik</button>
+            <button type="button" class="btn-preset" data-url="https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600&h=600&fit=crop">🍚 Beras/Sembako</button>
+          </div>
+        </div>
       </div>
-      <button type="submit" class="btn btn-primary btn-full">Simpan Produk</button>
+
+      <div class="form-group">
+        <label for="prod-desc">Deskripsi Singkat</label>
+        <textarea id="prod-desc" rows="3" placeholder="Tuliskan keunggulan produk, rasa, atau kemasan..."></textarea>
+      </div>
+
+      <div class="modal-form-actions">
+        <button type="button" class="btn btn-ghost" id="btn-cancel-product">Batal</button>
+        <button type="submit" class="btn btn-primary" id="btn-submit-product">Simpan Produk</button>
+      </div>
     </form>
   </div>
 
   <!-- ========== DELETE CONFIRMATION MODAL ========== -->
   <div class="modal-overlay" id="delete-overlay"></div>
-  <div class="delete-modal" id="delete-modal" role="dialog" aria-modal="true">
+  <div class="delete-modal" id="delete-modal" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
     <div class="delete-icon-wrap">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
     </div>
     <h3 id="delete-modal-title">Hapus data ini?</h3>
-    <p>Tindakan ini tidak dapat dibatalkan.</p>
+    <p id="delete-modal-desc">Tindakan ini akan menghapus data secara permanen dari database toko.</p>
     <div class="delete-actions">
       <button class="btn btn-ghost" id="btn-cancel-delete">Batal</button>
-      <button class="btn btn-danger" id="btn-confirm-delete">Hapus</button>
+      <button class="btn btn-danger" id="btn-confirm-delete">Hapus Sekarang</button>
     </div>
   </div>
 

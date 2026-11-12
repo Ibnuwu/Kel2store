@@ -4,7 +4,7 @@
 
 import { db } from "./firebase-config.js";
 import {
-  collection, getDocs, doc, updateDoc, addDoc, increment, serverTimestamp, query, orderBy
+  collection, getDocs, doc, updateDoc, addDoc, increment, serverTimestamp, query, orderBy, writeBatch
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // ─── SVG ICONS (Lucide-style) ────────────────────────
@@ -43,6 +43,154 @@ const CATEGORIES = [
   { name: "Lainnya", icon: "grid" }
 ];
 
+// ─── 12 DEFAULT PRODUCTS ──────────────────────────────
+const DEFAULT_PRODUCTS = [
+  {
+    name: "Indomie Goreng Original",
+    category: "Makanan",
+    price: 3500,
+    originalPrice: 4000,
+    rating: 5,
+    badge: "best-seller",
+    image: "https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=600&h=600&fit=crop",
+    sold: "2,5rb",
+    stock: 120,
+    description: "Indomie Mi Goreng rasa original legendaris dengan perpaduan bumbu rempah khas nusantara, gurih dan lezat."
+  },
+  {
+    name: "Teh Botol Sosro 450ml",
+    category: "Minuman",
+    price: 5500,
+    originalPrice: 6500,
+    rating: 4,
+    badge: null,
+    image: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=600&h=600&fit=crop",
+    sold: "1,8rb",
+    stock: 85,
+    description: "Minuman teh melati siap minum yang harum, segar, dan nikmat disajikan dingin."
+  },
+  {
+    name: "Chitato Lite Rasa Keju",
+    category: "Snack",
+    price: 12500,
+    originalPrice: 14000,
+    rating: 4,
+    badge: "new",
+    image: "https://images.unsplash.com/photo-1621447504864-d8686e12698c?w=600&h=600&fit=crop",
+    sold: "950",
+    stock: 60,
+    description: "Keripik kentang tipis renyah dengan taburan bumbu keju pilihan yang gurih dan creamy."
+  },
+  {
+    name: "Beras Premium 5kg",
+    category: "Kebutuhan Harian",
+    price: 72000,
+    originalPrice: 78000,
+    rating: 5,
+    badge: null,
+    image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600&h=600&fit=crop",
+    sold: "3,1rb",
+    stock: 40,
+    description: "Beras kualitas super putih bersih, pulen, wangi alami tanpa pemutih atau pengawet."
+  },
+  {
+    name: "Kopi Kapal Api Special",
+    category: "Minuman",
+    price: 15000,
+    originalPrice: 17500,
+    rating: 5,
+    badge: "best-seller",
+    image: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=600&h=600&fit=crop",
+    sold: "4,2rb",
+    stock: 95,
+    description: "Kopi bubuk murni terbuat dari biji kopi pilihan nusantara dengan aroma mantap dan cita rasa kopi hitam pekat."
+  },
+  {
+    name: "Oreo Vanilla Cream",
+    category: "Snack",
+    price: 9800,
+    originalPrice: 12000,
+    rating: 4,
+    badge: "promo",
+    image: "https://images.unsplash.com/photo-1590005354167-6da97870c757?w=600&h=600&fit=crop",
+    sold: "1,2rb",
+    stock: 70,
+    description: "Biskuit sandwich cokelat renyah dengan krim vanila lembut yang manis dan nikmat."
+  },
+  {
+    name: "Minyak Goreng Bimoli 2L",
+    category: "Kebutuhan Harian",
+    price: 35000,
+    originalPrice: 38000,
+    rating: 4,
+    badge: null,
+    image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=600&h=600&fit=crop",
+    sold: "2,1rb",
+    stock: 50,
+    description: "Minyak goreng kelapa sawit bermutu tinggi jernih untuk hasil masakan renyah sempurna."
+  },
+  {
+    name: "Ultra Milk Full Cream 1L",
+    category: "Minuman",
+    price: 18500,
+    originalPrice: 20000,
+    rating: 5,
+    badge: "new",
+    image: "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=600&h=600&fit=crop",
+    sold: "1,5rb",
+    stock: 65,
+    description: "Susu sapi segar alami diproses UHT higienis tanpa bahan pengawet. Kaya nutrisi dan kalsium."
+  },
+  {
+    name: "Sarden ABC Saus Pedas",
+    category: "Makanan",
+    price: 14500,
+    originalPrice: 17000,
+    rating: 4,
+    badge: "promo",
+    image: "https://images.unsplash.com/photo-1534483509719-3feaee7c30da?w=600&h=600&fit=crop",
+    sold: "890",
+    stock: 45,
+    description: "Ikan sarden segar pilihan dalam balutan saus tomat cabai pedas nikmat kaya rasa."
+  },
+  {
+    name: "Sabun Lifebuoy Total 10",
+    category: "Kebutuhan Harian",
+    price: 4200,
+    originalPrice: 5000,
+    rating: 4,
+    badge: null,
+    image: "https://images.unsplash.com/photo-1607006344380-b6775a0824a7?w=600&h=600&fit=crop",
+    sold: "1,7rb",
+    stock: 110,
+    description: "Sabun mandi batang antibakterial dengan perlindungan menyeluruh terhadap kuman."
+  },
+  {
+    name: "Richeese Nabati Keju",
+    category: "Snack",
+    price: 8500,
+    originalPrice: 10000,
+    rating: 5,
+    badge: "best-seller",
+    image: "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=600&h=600&fit=crop",
+    sold: "2,3rb",
+    stock: 75,
+    description: "Wafer renyah dengan krim keju asli melimpah yang gurih lezat berenergi."
+  },
+  {
+    name: "Aqua Air Mineral 600ml",
+    category: "Minuman",
+    price: 3500,
+    originalPrice: 4000,
+    rating: 5,
+    badge: null,
+    image: "https://images.unsplash.com/photo-1548839140-29a749e1bc4e?w=600&h=600&fit=crop",
+    sold: "3,8rb",
+    stock: 150,
+    description: "Air mineral pegunungan alami murni, higienis, dan menyegarkan untuk hidrasi harian."
+  }
+];
+
 // ─── STATE ───────────────────────────────────────────
 let PRODUCTS = [];
 let cart = JSON.parse(localStorage.getItem("kel2store_cart") || "[]");
@@ -56,19 +204,40 @@ async function loadProducts() {
   try {
     const snap = await getDocs(collection(db, "products"));
     PRODUCTS = snap.docs.map(d => ({ _docId: d.id, ...d.data() }));
+
+    // Jika Firestore masih kosong, gunakan DEFAULT_PRODUCTS dan otomatis seed
     if (PRODUCTS.length === 0) {
-      // Show empty state
-      const grid = document.getElementById("products-grid");
-      if (grid) grid.innerHTML = `<div class="empty-state">${ICONS.searchX}<h3>Belum ada produk</h3><p>Tunggu admin menambahkan produk ke toko.</p></div>`;
+      console.log("Firestore produk kosong, mengaktifkan katalog default...");
+      PRODUCTS = DEFAULT_PRODUCTS.map((p, idx) => ({ _docId: "prod-" + (idx + 1), ...p }));
+      renderProducts(PRODUCTS);
+      renderTopSellers();
+      renderCartDrawer();
+
+      // Auto-seed ke Firestore di latar belakang
+      try {
+        const batch = writeBatch(db);
+        DEFAULT_PRODUCTS.forEach(item => {
+          const docRef = doc(collection(db, "products"));
+          batch.set(docRef, { ...item, createdAt: serverTimestamp() });
+        });
+        await batch.commit();
+        console.log("12 produk default berhasil di-seed ke Firestore!");
+      } catch (seedErr) {
+        console.warn("Auto-seed Firestore tertunda:", seedErr);
+      }
       return;
     }
+
     renderProducts(PRODUCTS);
     renderTopSellers();
     renderCartDrawer();
   } catch (err) {
-    console.error("Gagal memuat produk dari Firestore:", err);
-    const grid = document.getElementById("products-grid");
-    if (grid) grid.innerHTML = `<div class="empty-state">${ICONS.searchX}<h3>Gagal memuat produk</h3><p>Periksa koneksi internet Anda.</p></div>`;
+    console.warn("Gagal membaca Firestore, menggunakan katalog default:", err);
+    // Fallback mulus: toko tetap menampilkan 12 produk lengkap!
+    PRODUCTS = DEFAULT_PRODUCTS.map((p, idx) => ({ _docId: "prod-" + (idx + 1), ...p }));
+    renderProducts(PRODUCTS);
+    renderTopSellers();
+    renderCartDrawer();
   }
 }
 
